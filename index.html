@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SXB Media Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        accent: {
+                            DEFAULT: 'var(--accent-color)',
+                            hover: 'var(--accent-hover)',
+                            light: 'var(--accent-light)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent-color: #10b981;
+            --accent-hover: #059669;
+            --accent-light: rgba(16, 185, 129, 0.1);
+            --bg-base: #030712;
+            --bg-card: #111827;
+            --border-color: #1f2937;
+        }
+        .theme-emerald { --accent-color: #10b981; --accent-hover: #059669; --accent-light: rgba(16, 185, 129, 0.1); }
+        .theme-violet { --accent-color: #8b5cf6; --accent-hover: #7c3aed; --accent-light: rgba(139, 92, 246, 0.1); }
+        .theme-cyan { --accent-color: #06b6d4; --accent-hover: #0891b2; --accent-light: rgba(6, 182, 212, 0.1); }
+        .theme-rose { --accent-color: #f43f5e; --accent-hover: #e11d48; --accent-light: rgba(244, 63, 94, 0.1); }
+        .theme-amber { --accent-color: #f59e0b; --accent-hover: #d97706; --accent-light: rgba(245, 158, 11, 0.1); }
+
+        /* Light mode overrides */
+        html:not(.dark) {
+            --bg-base: #f3f4f6;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        html:not(.dark) body { background-color: var(--bg-base); color: #111827; }
+        html:not(.dark) .bg-gray-950 { background-color: #f9fafb !important; }
+        html:not(.dark) .bg-gray-900 { background-color: #ffffff !important; }
+        html:not(.dark) .bg-gray-800 { background-color: #e5e7eb !important; color: #111827 !important; }
+        html:not(.dark) .border-gray-800, html:not(.dark) .border-gray-700 { border-color: #d1d5db !important; }
+        html:not(.dark) .text-gray-100, html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-gray-400, html:not(.dark) .text-gray-300 { color: #4b5563 !important; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-card); }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+
+        textarea.auto-expand {
+            resize: none;
+            overflow: hidden;
+            min-height: 80px;
+        }
+
+        /* Mobile Responsive Scale Adjustments */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            .max-w-5xl, .max-w-7xl {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-sans theme-emerald transition-colors duration-300" id="bodyRoot" onclick="closeAllDropdowns(event)">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50 px-4 md:px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3 md:gap-6">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="bg-accent text-gray-950 p-2 rounded-lg font-bold flex items-center justify-center shadow-lg shadow-accent/20">
+                    <i class="fa-solid fa-clapperboard text-base md:text-lg"></i>
+                </div>
+                <span class="font-bold text-base md:text-lg tracking-wide text-white">SXB Media</span>
+            </div>
+            <!-- Desktop Navbar -->
+            <nav class="hidden lg:flex items-center gap-1 bg-gray-950 p-1 rounded-lg border border-gray-800" id="mainNavbar">
+                <button onclick="switchTab('overview')" id="nav-overview" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-white bg-accent text-gray-950 shadow">Overview</button>
+                <button onclick="switchTab('upload')" id="nav-upload" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white">Upload</button>
+                <button onclick="switchTab('revisions')" id="nav-revisions" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white">Revisions</button>
+                <button onclick="switchTab('awaiting')" id="nav-awaiting" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white">Awaiting Review</button>
+                <button onclick="switchTab('approved')" id="nav-approved" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white">Approved</button>
+                <button onclick="switchTab('output')" id="nav-output" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white">Output</button>
+                <button onclick="switchTab('adminOutputs')" id="nav-adminOutputs" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white hidden flex items-center gap-1.5"><i class="fa-solid fa-video text-xs"></i> Admin Outputs Review</button>
+                <button onclick="switchTab('admin')" id="nav-admin" class="px-3 py-1.5 rounded-md text-xs font-medium transition tab-btn text-gray-400 hover:text-white flex items-center gap-1.5 hidden"><i class="fa-solid fa-shield-halved text-xs"></i> Admin Panel</button>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+            <!-- Mobile Menu Toggle Button -->
+            <button onclick="toggleMobileMenu(event)" class="lg:hidden p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition" title="Toggle Navigation">
+                <i class="fa-solid fa-bars text-accent"></i>
+            </button>
+
+            <!-- Theme Color Selector Dropdown -->
+            <div class="relative">
+                <button onclick="toggleDropdown(event, 'themeDropdown')" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition" title="Change Theme">
+                    <i class="fa-solid fa-palette text-accent"></i>
+                </button>
+                <div id="themeDropdown" class="absolute right-0 mt-2 w-36 bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-2 hidden z-50">
+                    <div class="text-xs text-gray-400 px-2 pb-1 font-semibold">Accent Color</div>
+                    <div class="grid grid-cols-5 gap-1.5 p-1">
+                        <button onclick="setTheme('emerald')" class="w-6 h-6 rounded-full bg-emerald-500 hover:scale-110 transition"></button>
+                        <button onclick="setTheme('violet')" class="w-6 h-6 rounded-full bg-violet-500 hover:scale-110 transition"></button>
+                        <button onclick="setTheme('cyan')" class="w-6 h-6 rounded-full bg-cyan-500 hover:scale-110 transition"></button>
+                        <button onclick="setTheme('rose')" class="w-6 h-6 rounded-full bg-rose-500 hover:scale-110 transition"></button>
+                        <button onclick="setTheme('amber')" class="w-6 h-6 rounded-full bg-amber-500 hover:scale-110 transition"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Light/Dark Toggle Button -->
+            <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition" title="Toggle Dark/Light Mode">
+                <i class="fa-solid fa-moon" id="darkIcon"></i>
+            </button>
+
+            <!-- Role & User Profile Switcher Dropdown -->
+            <div class="flex items-center gap-2 md:gap-3 pl-2 border-l border-gray-800">
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs font-semibold text-white" id="userNameDisplay">Harvy</div>
+                    <div class="text-[10px] text-accent font-medium uppercase tracking-wider" id="userRoleDisplay">Creator</div>
+                </div>
+                <div class="relative">
+                    <button onclick="toggleDropdown(event, 'profileDropdown')" class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-accent/20 border border-accent text-accent font-bold flex items-center justify-center hover:bg-accent hover:text-gray-950 transition text-xs md:text-sm">
+                        H
+                    </button>
+                    <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-lg shadow-xl py-1 hidden z-50">
+                        <div class="px-4 py-2 border-b border-gray-800">
+                            <p class="text-xs text-gray-400">Signed in as</p>
+                            <p class="text-sm font-bold text-white truncate" id="dropdownUserName">Harvy (Creator)</p>
+                        </div>
+                        <button onclick="switchRole('Creator')" class="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-user text-accent"></i> Switch to Creator View
+                        </button>
+                        <button onclick="switchRole('Admin')" class="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-accent"></i> Switch to Admin View
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer / Dropdown -->
+    <div id="mobileNavDrawer" class="lg:hidden bg-gray-900 border-b border-gray-800 px-4 py-3 hidden space-y-1.5 z-40">
+        <button onclick="switchTabMobile('overview')" id="mnav-overview" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-white bg-accent text-gray-950">Overview</button>
+        <button onclick="switchTabMobile('upload')" id="mnav-upload" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800">Upload</button>
+        <button onclick="switchTabMobile('revisions')" id="mnav-revisions" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800">Revisions</button>
+        <button onclick="switchTabMobile('awaiting')" id="mnav-awaiting" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800">Awaiting Review</button>
+        <button onclick="switchTabMobile('approved')" id="mnav-approved" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800">Approved</button>
+        <button onclick="switchTabMobile('output')" id="mnav-output" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800">Output</button>
+        <button onclick="switchTabMobile('adminOutputs')" id="mnav-adminOutputs" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800 hidden flex items-center gap-2"><i class="fa-solid fa-video text-xs"></i> Admin Outputs Review</button>
+        <button onclick="switchTabMobile('admin')" id="mnav-admin" class="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-gray-300 hover:bg-gray-800 hidden flex items-center gap-2"><i class="fa-solid fa-shield-halved text-xs"></i> Admin Panel</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- OVERVIEW TAB -->
+        <section id="tab-overview" class="tab-content space-y-6 md:space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-white">Welcome back, <span id="welcomeName" class="text-accent">Harvy</span>.</h1>
+                    <p class="text-xs md:text-sm text-gray-400 mt-1">Upload a batch, then watch it move through review here.</p>
+                </div>
+                <button onclick="switchTab('upload')" class="bg-accent hover:bg-accent-hover text-gray-950 font-semibold px-4 md:px-5 py-2.5 rounded-lg text-xs md:text-sm transition flex items-center gap-2 shadow-lg shadow-accent/20 self-start">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload reels
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                <div onclick="switchTab('revisions')" class="bg-gray-900 border border-gray-800 hover:border-amber-500/50 rounded-xl p-4 md:p-5 transition relative overflow-hidden group cursor-pointer">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <div class="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center text-base md:text-lg">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <span class="text-xl md:text-2xl font-black text-white" id="stat-revision">0</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xs md:text-sm">Needs your attention</h3>
+                    <p class="text-[11px] md:text-xs text-gray-400 mt-0.5">QA asked for a new version</p>
+                </div>
+
+                <div onclick="switchTab('awaiting')" class="bg-gray-900 border border-gray-800 hover:border-cyan-500/50 rounded-xl p-4 md:p-5 transition relative overflow-hidden group cursor-pointer">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <div class="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center text-base md:text-lg">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <span class="text-xl md:text-2xl font-black text-white" id="stat-awaiting">0</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xs md:text-sm">Awaiting review</h3>
+                    <p class="text-[11px] md:text-xs text-gray-400 mt-0.5">With QA now</p>
+                </div>
+
+                <div onclick="switchTab('approved')" class="bg-gray-900 border border-gray-800 hover:border-emerald-500/50 rounded-xl p-4 md:p-5 transition relative overflow-hidden group cursor-pointer">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <div class="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-base md:text-lg">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <span class="text-xl md:text-2xl font-black text-white" id="stat-approved">0</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xs md:text-sm">Approved</h3>
+                    <p class="text-[11px] md:text-xs text-gray-400 mt-0.5">Cleared by QA</p>
+                </div>
+
+                <div onclick="switchTab('output')" class="bg-gray-900 border border-gray-800 hover:border-purple-500/50 rounded-xl p-4 md:p-5 transition relative overflow-hidden group cursor-pointer">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <div class="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center text-base md:text-lg">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                        </div>
+                        <span class="text-xl md:text-2xl font-black text-white" id="stat-uploaded">0</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xs md:text-sm">Total Uploaded</h3>
+                    <p class="text-[11px] md:text-xs text-gray-400 mt-0.5">Submitted reels</p>
+                </div>
+            </div>
+
+            <!-- Submissions Queue Table -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6">
+                <div class="flex items-center justify-between mb-4 md:mb-6">
+                    <h3 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-accent"></i> Submitted Reels Queue
+                    </h3>
+                    <span class="text-xs bg-gray-800 text-gray-300 px-2.5 py-1 rounded-full font-medium" id="queueCount">0 Active Submissions</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs md:text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400">
+                                <th class="pb-3 px-3">Reel ID / Title</th>
+                                <th class="pb-3 px-3">Model & Niche</th>
+                                <th class="pb-3 px-3">Status</th>
+                                <th class="pb-3 px-3">Submitted Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overviewQueueTable" class="divide-y divide-gray-800 text-gray-300"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- UPLOAD TAB -->
+        <section id="tab-upload" class="tab-content hidden space-y-6 md:space-y-8">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white">Upload</h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">Select date (Month, Day, Year), choose admin inspiration video, fill out details, and submit.</p>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 space-y-6">
+                <!-- Date Picker Dropdown Selector (Month, Day, Year) -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Date * (Select Month, Day, Year)</label>
+                    <div class="grid grid-cols-3 gap-2 md:gap-3 max-w-md">
+                        <select id="uploadMonth" onchange="onUploadDateChange()" class="bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-2 md:py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="">Month</option>
+                            <option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                        </select>
+                        <select id="uploadDay" onchange="onUploadDateChange()" class="bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-2 md:py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="">Day</option>
+                        </select>
+                        <select id="uploadYear" onchange="onUploadDateChange()" class="bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-2 md:py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="">Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Inspiration Video Selection Grid -->
+                <div>
+                    <label class="block text-xs md:text-sm font-semibold text-white mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <span>Which inspo did you follow? <span class="text-rose-500 text-xs font-bold">* Required</span></span>
+                        <span id="selectedInspoBadge" class="text-xs text-accent font-medium hidden"><i class="fa-solid fa-check"></i> Selected Inspo</span>
+                    </label>
+                    <div id="uploadInspoContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 p-3 border border-gray-800 rounded-lg bg-gray-950">
+                        <div class="col-span-full text-center py-6 text-gray-500 text-xs">Please select Month, Day, and Year above.</div>
+                    </div>
+                </div>
+
+                <!-- Model & Niche Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-800">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Model</label>
+                        <select id="uploadModelSelect" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 md:px-4 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="">Choose a model...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Niche</label>
+                        <select id="uploadNicheSelect" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 md:px-4 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="">Choose a niche...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Title Format & Prompt Box Inputs -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Title Format</label>
+                        <input type="text" id="uploadTitleInput" placeholder="ReelID_Model_Niche_Creator_#" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 md:px-4 py-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Prompt Box (Prompt used to create video)</label>
+                        <textarea id="uploadPromptInput" rows="3" oninput="autoResizeTextarea(this)" placeholder="Enter exact prompt..." class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-xs md:text-sm text-white focus:outline-none focus:border-accent font-mono auto-expand"></textarea>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Submission Bin -->
+                <div class="pt-4 border-t border-gray-800">
+                    <label class="block text-xs md:text-sm font-semibold text-white mb-2">Drop reels here</label>
+                    <div class="border-2 border-dashed border-gray-800 hover:border-accent rounded-xl p-6 md:p-8 text-center bg-gray-950 transition cursor-pointer relative">
+                        <input type="file" id="fileInput" multiple accept="video/*,image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileSelect(event)">
+                        <div class="flex flex-col items-center justify-center space-y-2">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-accent/10 text-accent flex items-center justify-center text-lg md:text-xl">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <p class="text-xs text-gray-400">MP4, MOV or WebM - up to 50 at once</p>
+                            <div id="attachedFilesPreview" class="flex flex-wrap gap-2 justify-center mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4 flex justify-end">
+                    <button onclick="submitUploadReel()" class="w-full sm:w-auto bg-accent hover:bg-accent-hover text-gray-950 font-bold px-6 md:px-8 py-3 rounded-lg text-xs md:text-sm transition shadow-lg shadow-accent/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Reel for Review
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- REVISIONS TAB -->
+        <section id="tab-revisions" class="tab-content hidden space-y-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Revisions Queue</h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">Review reels requiring changes and resubmit. Click any revision card to view feedback, change video, title, and prompt text.</p>
+            </div>
+            <div id="revisionsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- AWAITING REVIEW TAB -->
+        <section id="tab-awaiting" class="tab-content hidden space-y-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-clock text-cyan-400"></i> Awaiting Review Queue</h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">Videos you uploaded that are currently awaiting review by admins. Click any card to view, unsubmit, or edit.</p>
+            </div>
+            <div id="awaitingContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- APPROVED TAB -->
+        <section id="tab-approved" class="tab-content hidden space-y-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-400"></i> Approved Videos</h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">Videos you uploaded that have been approved by admins, organized by inspiration date.</p>
+            </div>
+            <div id="approvedContainer" class="space-y-4"></div>
+        </section>
+
+        <!-- OUTPUT TAB -->
+        <section id="tab-output" class="tab-content hidden space-y-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white">Output</h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">All completed and submitted outputs</p>
+            </div>
+            <div id="outputListContainer" class="space-y-4"></div>
+        </section>
+
+        <!-- ADMIN OUTPUTS REVIEW TAB -->
+        <section id="tab-adminOutputs" class="tab-content hidden space-y-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-video text-accent"></i> Admin Outputs Review</h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">Review all uploaded outputs by creators, admins, or yourself. Click any submission to approve or disapprove with custom revision notes.</p>
+            </div>
+            <div id="adminOutputsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- ADMIN PANEL TAB (Admin Only) -->
+        <section id="tab-admin" class="tab-content hidden space-y-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-accent"></i> Admin Management Portal</h1>
+                    <p class="text-xs md:text-sm text-gray-400 mt-1">Attach inspiration videos per date, manage Prompt Reference text boxes, and review submissions.</p>
+                </div>
+                <div class="bg-accent/10 border border-accent/30 text-accent px-3.5 py-1.5 rounded-lg text-xs font-bold self-start">
+                    <i class="fa-solid fa-circle-check"></i> Admin Mode Active
+                </div>
+            </div>
+
+            <!-- Admin Configuration Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Attach Inspo Video by Date -->
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 space-y-4">
+                    <h3 class="text-sm md:text-base font-bold text-white border-b border-gray-800 pb-3">Attach Inspiration Video</h3>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Select Date (Month, Day, Year Dropdowns)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <select id="adminMonth" class="bg-gray-950 border border-gray-800 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-accent">
+                                <option value="">Month</option>
+                                <option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                            </select>
+                            <select id="adminDay" class="bg-gray-950 border border-gray-800 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-accent">
+                                <option value="">Day</option>
+                            </select>
+                            <select id="adminYear" class="bg-gray-950 border border-gray-800 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-accent">
+                                <option value="">Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Video Source Type Selector -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase">Video Source</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 text-xs text-white cursor-pointer">
+                                <input type="radio" name="adminVideoSourceType" value="url" checked onchange="toggleAdminVideoSourceInput()" class="accent-emerald-500"> Video URL
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-white cursor-pointer">
+                                <input type="radio" name="adminVideoSourceType" value="upload" onchange="toggleAdminVideoSourceInput()" class="accent-emerald-500"> File Upload
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- URL Input Box -->
+                    <div id="adminUrlInputContainer">
+                        <input type="text" id="adminInspoUrlInput" placeholder="https://www.w3schools.com/html/mov_bbb.mp4" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                    </div>
+
+                    <!-- Drag & Drop / File Upload Box -->
+                    <div id="adminFileUploadContainer" class="hidden">
+                        <div class="border-2 border-dashed border-gray-800 hover:border-accent rounded-xl p-6 text-center bg-gray-950 transition cursor-pointer relative">
+                            <input type="file" id="adminFileInput" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleAdminFileSelect(event)">
+                            <div class="flex flex-col items-center justify-center space-y-1">
+                                <i class="fa-solid fa-cloud-arrow-up text-accent text-lg"></i>
+                                <p class="text-xs text-gray-400">Drag video or click to choose</p>
+                                <span id="adminSelectedFileName" class="text-xs text-accent font-semibold mt-1"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Inspo Number</label>
+                        <input type="text" id="adminInspoDescInput" placeholder="Enter inspo number (e.g. R001_SCHOOL_OCT21)..." class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-xs md:text-sm text-white focus:outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Inspo Notes (Notes for all creators and admins)</label>
+                        <textarea id="adminInspoNotesInput" rows="2" oninput="autoResizeTextarea(this)" placeholder="Enter general notes for this inspo..." class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-xs md:text-sm text-white focus:outline-none focus:border-accent auto-expand"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Prompt Reference (Unlimited text box)</label>
+                        <textarea id="adminInspoPromptRef" rows="3" oninput="autoResizeTextarea(this)" placeholder="Enter reference prompt instructions..." class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-accent font-mono auto-expand"></textarea>
+                    </div>
+                    <button onclick="adminAttachInspoVideo()" class="w-full bg-accent hover:bg-accent-hover text-gray-950 font-bold py-2.5 rounded-lg text-xs md:text-sm transition shadow">
+                        Save & Attach Inspiration Video
+                    </button>
+                </div>
+
+                <!-- Dropdown Settings -->
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 space-y-4">
+                    <h3 class="text-sm md:text-base font-bold text-white border-b border-gray-800 pb-3">Dropdown Settings (Models & Niches)</h3>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Add Model</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="adminNewModelInput" placeholder="Model name..." class="flex-1 bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-xs md:text-sm text-white">
+                            <button onclick="adminAddModel()" class="bg-accent text-gray-950 font-bold px-4 py-2 rounded-lg text-xs">Add</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Add Niche</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="adminNewNicheInput" placeholder="Niche name..." class="flex-1 bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-xs md:text-sm text-white">
+                            <button onclick="adminAddNiche()" class="bg-accent text-gray-950 font-bold px-4 py-2 rounded-lg text-xs">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submissions Review Queue -->
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 space-y-4">
+                <h3 class="text-sm md:text-base font-bold text-white">Review Submissions & Approve / Revision</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs md:text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400">
+                                <th class="pb-3 px-3">Reel Title & Prompt</th>
+                                <th class="pb-3 px-3">Model & Niche</th>
+                                <th class="pb-3 px-3">Status</th>
+                                <th class="pb-3 px-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminSubmissionsTableBody" class="divide-y divide-gray-800 text-gray-300"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Video Player & Inspiration Details -->
+    <div id="videoModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 md:p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-lg w-full p-4 md:p-6 space-y-4 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+            <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            
+            <h3 class="text-sm md:text-base font-bold text-white tracking-wide pr-6" id="modalTitle">Inspo #R001_SCHOOL_OCT21</h3>
+            
+            <div class="bg-black rounded-xl overflow-hidden border border-gray-800 flex items-center justify-center max-h-[45vh]">
+                <video id="modalVideoPlayer" controls class="max-w-full max-h-[45vh] object-contain">
+                    <source src="" id="modalVideoSource" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div class="space-y-3">
+                <div id="modalInspoNotesBox">
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Inspo Notes</h4>
+                    <div id="modalInspoNotesText" class="text-xs text-gray-300 bg-gray-950 p-3 rounded-lg border border-gray-800 whitespace-pre-wrap leading-relaxed"></div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Prompt Reference</h4>
+                    <div id="modalPromptRef" class="text-xs font-mono text-gray-200 bg-gray-950 p-3 rounded-lg border border-gray-800 whitespace-pre-wrap max-h-28 overflow-y-auto leading-relaxed"></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-gray-800">
+                <a id="modalDownloadBtn" href="#" download target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> Download Video
+                </a>
+                <button id="modalSelectBtn" onclick="confirmSelectInspoFromModal()" class="bg-accent hover:bg-accent-hover text-gray-950 px-6 py-2 rounded-lg text-xs font-bold transition shadow">
+                    Select as Followed Inspo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gorgeous Detailed Side-by-Side Submission Review & Resubmission Modal -->
+    <div id="submissionModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 md:p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative">
+            
+            <!-- Modal Header -->
+            <div class="px-4 md:px-6 py-3.5 border-b border-gray-800 flex items-center justify-between bg-gray-950/50">
+                <div class="flex items-center gap-2 md:gap-3 overflow-hidden pr-2">
+                    <span id="subModalReelIdBadge" class="bg-accent/10 border border-accent/30 text-accent font-mono text-xs font-bold px-2 py-0.5 rounded-md shrink-0">#32987</span>
+                    <h2 class="text-xs md:text-sm font-bold text-white tracking-wide truncate" id="subModalHeaderTitleText">RO01_LUNA_SCHOOL_HARVY_2</h2>
+                </div>
+                <button onclick="closeSubmissionModal()" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white flex items-center justify-center transition shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Grid -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-start">
+                
+                <!-- LEFT COLUMN: Side-by-Side Video Players -->
+                <div class="lg:col-span-7 grid grid-cols-2 gap-3 md:gap-4">
+                    <!-- Inspo Video Card -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-lightbulb text-accent"></i> Inspo</span>
+                        </div>
+                        <div class="aspect-[9/16] bg-black rounded-xl overflow-hidden border border-gray-800 relative flex items-center justify-center shadow-lg">
+                            <video id="subModalInspoVideoPlayer" controls class="w-full h-full object-contain">
+                                <source src="" id="subModalInspoVideoSource" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+
+                    <!-- Submitted Reel Video Card -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-video text-accent"></i> Reel</span>
+                        </div>
+                        <div class="aspect-[9/16] bg-black rounded-xl overflow-hidden border border-gray-800 relative flex items-center justify-center shadow-lg group">
+                            <video id="subModalReelVideoPlayer" controls class="w-full h-full object-contain">
+                                <source src="" id="subModalReelVideoSource" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div id="subModalEditOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center hidden">
+                                <i class="fa-solid fa-pen-to-square text-accent text-xl md:text-2xl mb-1"></i>
+                                <p class="text-[11px] md:text-xs text-white font-bold mb-2">Upload New Video File for Revision</p>
+                                <input type="file" id="modalSubEditFileInput" accept="video/*" class="text-[10px] text-gray-300 w-full file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-accent file:text-gray-950 hover:file:bg-accent-hover cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Detailed Metadata, Status, Prompt & History -->
+                <div class="lg:col-span-5 space-y-3 md:space-y-4">
+                    
+                    <!-- Top Meta Pill Card -->
+                    <div class="bg-gray-950 border border-gray-800 rounded-xl p-3.5 md:p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gray-900 border border-gray-800 px-2.5 py-1 rounded-md text-xs font-semibold text-white flex items-center gap-1.5" id="subModalModelBadge"><i class="fa-solid fa-user text-accent"></i> Luna</span>
+                                <span class="bg-gray-900 border border-gray-800 px-2.5 py-1 rounded-md text-xs font-semibold text-white flex items-center gap-1.5" id="subModalNicheBadge"><i class="fa-solid fa-tag text-accent"></i> School</span>
+                            </div>
+                            <span id="subModalStatusBadge" class="px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">Needs revision</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-400 pt-1 border-t border-gray-800">
+                            <span>Submitted by <strong class="text-white" id="subModalCreatorName">Harvy</strong></span>
+                            <span id="subModalDateDisplay">Submitted 18 Oct 2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Followed Inspo Reference Info Box -->
+                    <div class="bg-gray-950 border border-gray-800 rounded-xl p-3.5 md:p-4 space-y-2">
+                        <div class="flex items-center gap-2 text-xs font-bold text-gray-300">
+                            <i class="fa-solid fa-lightbulb text-amber-400"></i> Followed this inspo:
+                        </div>
+                        <p class="text-xs font-mono text-accent bg-gray-900 p-2 rounded border border-gray-800 truncate" id="subModalInspoTitleDisplay">Inspo #R001_SCHOOL_OCT21</p>
+                    </div>
+
+                    <!-- Prompt Text Box -->
+                    <div class="bg-gray-950 border border-gray-800 rounded-xl p-3.5 md:p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-terminal text-accent"></i> Prompt Instructions
+                            </span>
+                        </div>
+                        <div id="subModalPromptDisplayContainer">
+                            <p class="text-xs font-mono text-gray-300 bg-gray-900 p-3 rounded border border-gray-800 whitespace-pre-wrap max-h-28 md:max-h-32 overflow-y-auto leading-relaxed" id="subModalPromptText">Change the mom's outfit to a more hot-looking...</p>
+                        </div>
+                        <div id="subModalPromptEditContainer" class="hidden space-y-2">
+                            <textarea id="subModalEditPromptInput" rows="4" oninput="autoResizeTextarea(this)" class="w-full bg-gray-900 border border-accent rounded-lg p-2.5 text-xs text-white font-mono focus:outline-none auto-expand"></textarea>
+                            <input type="text" id="subModalEditTitleInput" placeholder="Edit Reel Title..." class="w-full bg-gray-900 border border-accent rounded-lg px-3 py-2 text-xs text-white font-bold">
+                        </div>
+                    </div>
+
+                    <!-- History & QA Feedback Box -->
+                    <div class="bg-gray-950 border border-gray-800 rounded-xl p-3.5 md:p-4 space-y-2">
+                        <span class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock-rotate-left text-accent"></i> History & QA Feedback
+                        </span>
+                        <div class="bg-gray-900 p-3 rounded border border-gray-800 space-y-1.5 max-h-28 overflow-y-auto" id="subModalHistoryContainer">
+                            <div class="flex items-start gap-2 text-xs text-gray-300">
+                                <span class="w-2 h-2 rounded-full bg-red-500 mt-1 shrink-0"></span>
+                                <div>
+                                    <p class="font-semibold text-white">Patrick QA sent back v1 - 19/10/2026, 00:54:43</p>
+                                    <p class="text-gray-400 text-[11px] mt-0.5">lagay black outlines sa subtitles</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="px-4 md:px-6 py-3.5 border-t border-gray-800 bg-gray-950/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2" id="subModalActionButtons">
+                    <button onclick="unsubmitCurrentSubmission()" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border border-red-500/20">
+                        <i class="fa-solid fa-trash-can"></i> Unsubmit
+                    </button>
+                    <button id="subModalToggleEditBtn" onclick="toggleSubModalEditMode()" class="flex-1 sm:flex-none bg-amber-500/10 hover:bg-amber-500 hover:text-white text-amber-400 px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border border-amber-500/25">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit & Resubmit
+                    </button>
+                </div>
+                <button onclick="closeSubmissionModal()" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-xs font-medium transition text-center">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal for Admin Output Review & Disapproval Feedback -->
+    <div id="adminReviewModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-3 md:p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl max-w-2xl w-full p-4 md:p-6 space-y-4 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminReviewModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-accent"></i> Review Output Submission
+            </h3>
+
+            <div class="bg-black rounded-lg overflow-hidden border border-gray-800 flex items-center justify-center max-h-[45vh]">
+                <video id="adminReviewVideoPlayer" controls class="max-w-full max-h-[45vh] object-contain">
+                    <source src="" id="adminReviewVideoSource" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-semibold text-gray-400 uppercase">Title</h4>
+                <p id="adminReviewTitle" class="text-xs md:text-sm text-white font-bold mt-1 bg-gray-950 p-3 rounded border border-gray-800"></p>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-gray-400 uppercase">Model & Niche / Creator</h4>
+                <p id="adminReviewMeta" class="text-xs text-accent mt-1 bg-gray-950 p-3 rounded border border-gray-800"></p>
+            </div>
+            <div>
+                <h4 class="text-xs font-semibold text-gray-400 uppercase">Prompt Text Attached</h4>
+                <p id="adminReviewPrompt" class="text-xs font-mono text-white mt-1 bg-gray-950 p-3 rounded border border-gray-800 whitespace-pre-wrap"></p>
+            </div>
+
+            <!-- Disapproval Feedback Section -->
+            <div id="disapprovalSection" class="hidden space-y-2 pt-2 border-t border-gray-800">
+                <label class="block text-xs font-semibold text-amber-400 uppercase">Disapproval / Revision Feedback (Unlimited text box)</label>
+                <textarea id="adminDisapprovalNotes" rows="4" oninput="autoResizeTextarea(this)" placeholder="Enter detailed feedback on what needs to be fixed or changed..." class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono auto-expand"></textarea>
+                <button onclick="confirmAdminDisapproval()" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold px-6 py-2 rounded text-xs transition shadow">
+                    Submit Disapproval & Issue Revision
+                </button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-gray-800" id="adminReviewActions">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <button onclick="adminApproveSubmission(activeAdminReviewSubId)" class="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white px-4 py-2.5 rounded text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-circle-check"></i> Approve Output
+                    </button>
+                    <button onclick="showAdminDisapprovalBox()" class="bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-4 py-2.5 rounded text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Disapprove / Issue Revision
+                    </button>
+                </div>
+                <button onclick="closeAdminReviewModal()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-xs font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-4 px-6 text-center text-xs text-gray-500 mt-auto">
+        SXB Media Workflow Management System &copy; 2026. All rights reserved.
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let currentRole = "Creator";
+        let currentTheme = "emerald";
+        let isDarkMode = true;
+        let selectedInspoId = null;
+        let modalActiveInspoId = null;
+        let adminUploadedVideoObjectUrl = "";
+
+        let activeSubmissionModalId = null;
+        let activeAdminReviewSubId = null;
+        let isSubModalInEditMode = false;
+
+        const defaultAppData = {
+            models: [],
+            niches: [],
+            inspoVideos: [],
+            submissions: []
+        };
+
+        let appData = JSON.parse(localStorage.getItem('sxb_media_data_v19')) || defaultAppData;
+
+        function saveData() {
+            localStorage.setItem('sxb_media_data_v19', JSON.stringify(appData));
+        }
+
+        window.onload = function() {
+            populateDateDropdowns();
+            
+            const now = new Date();
+            document.getElementById('uploadMonth').value = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('uploadDay').value = String(now.getDate()).padStart(2, '0');
+            document.getElementById('uploadYear').value = String(now.getFullYear());
+
+            document.getElementById('adminMonth').value = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('adminDay').value = String(now.getDate()).padStart(2, '0');
+            document.getElementById('adminYear').value = String(now.getFullYear());
+
+            updateRoleUI();
+            renderOverview();
+            renderUploadDropdowns();
+            renderUploadInspoVideos();
+            renderRevisions();
+            renderAwaiting();
+            renderApproved();
+            renderOutputs();
+            renderAdminOutputs();
+            renderAdminPanel();
+        };
+
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight + 4) + 'px';
+        }
+
+        function populateDateDropdowns() {
+            const daysHTML = '<option value="">Day</option>' + Array.from({length: 31}, (_, i) => {
+                let d = String(i + 1).padStart(2, '0');
+                return `<option value="${d}">${i + 1}</option>`;
+            }).join('');
+
+            const currentYearNum = new Date().getFullYear();
+            const yearsHTML = '<option value="">Year</option>' + Array.from({length: 5}, (_, i) => {
+                let y = currentYearNum - 1 + i;
+                return `<option value="${y}">${y}</option>`;
+            }).join('');
+
+            document.getElementById('uploadDay').innerHTML = daysHTML;
+            document.getElementById('uploadYear').innerHTML = yearsHTML;
+
+            document.getElementById('adminDay').innerHTML = daysHTML;
+            document.getElementById('adminYear').innerHTML = yearsHTML;
+        }
+
+        function toggleDropdown(event, dropdownId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(dropdownId);
+            document.querySelectorAll('[id$="Dropdown"]').forEach(el => {
+                if(el.id !== dropdownId) el.classList.add('hidden');
+            });
+            dropdown.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu(event) {
+            event.stopPropagation();
+            const drawer = document.getElementById('mobileNavDrawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function closeAllDropdowns(event) {
+            document.querySelectorAll('[id$="Dropdown"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+            const drawer = document.getElementById('mobileNavDrawer');
+            if (drawer && !drawer.classList.contains('hidden')) {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tabId) {
+            if (tabId === 'admin' && currentRole !== 'Admin') {
+                alert('Access denied. Admin privileges required.');
+                return;
+            }
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-accent', 'text-gray-950', 'shadow', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('bg-accent', 'text-gray-950', 'shadow', 'text-white');
+            }
+
+            // Sync mobile drawer buttons
+            document.querySelectorAll('#mobileNavDrawer button').forEach(btn => {
+                btn.classList.remove('bg-accent', 'text-gray-950', 'text-white');
+                btn.classList.add('text-gray-300', 'hover:bg-gray-800');
+            });
+            const mobileActiveBtn = document.getElementById(`mnav-${tabId}`);
+            if (mobileActiveBtn) {
+                mobileActiveBtn.classList.remove('text-gray-300', 'hover:bg-gray-800');
+                mobileActiveBtn.classList.add('bg-accent', 'text-gray-950', 'text-white');
+            }
+
+            document.getElementById('mobileNavDrawer').classList.add('hidden');
+        }
+
+        function switchTabMobile(tabId) {
+            switchTab(tabId);
+        }
+
+        function switchRole(role) {
+            currentRole = role;
+            updateRoleUI();
+            if (role === 'Admin') {
+                document.getElementById('nav-admin').classList.remove('hidden');
+                document.getElementById('nav-adminOutputs').classList.remove('hidden');
+                document.getElementById('mnav-admin').classList.remove('hidden');
+                document.getElementById('mnav-adminOutputs').classList.remove('hidden');
+                switchTab('adminOutputs');
+            } else {
+                document.getElementById('nav-admin').classList.add('hidden');
+                document.getElementById('nav-adminOutputs').classList.add('hidden');
+                document.getElementById('mnav-admin').classList.add('hidden');
+                document.getElementById('mnav-adminOutputs').classList.add('hidden');
+                switchTab('overview');
+            }
+        }
+
+        function updateRoleUI() {
+            document.getElementById('userNameDisplay').innerText = currentRole === 'Admin' ? 'Admin Controller' : 'Harvy';
+            document.getElementById('userRoleDisplay').innerText = currentRole;
+            document.getElementById('dropdownUserName').innerText = currentRole === 'Admin' ? 'Admin (Full Access)' : 'Harvy (Creator)';
+            
+            const adminNav = document.getElementById('nav-admin');
+            const adminOutputsNav = document.getElementById('nav-adminOutputs');
+            const madminNav = document.getElementById('mnav-admin');
+            const madminOutputsNav = document.getElementById('mnav-adminOutputs');
+
+            if (currentRole === 'Admin') {
+                adminNav.classList.remove('hidden');
+                adminOutputsNav.classList.remove('hidden');
+                madminNav.classList.remove('hidden');
+                madminOutputsNav.classList.remove('hidden');
+            } else {
+                adminNav.classList.add('hidden');
+                adminOutputsNav.classList.add('hidden');
+                madminNav.classList.add('hidden');
+                madminOutputsNav.classList.add('hidden');
+            }
+        }
+
+        function setTheme(color) {
+            currentTheme = color;
+            const body = document.getElementById('bodyRoot');
+            body.className = body.className.replace(/theme-\w+/, `theme-${color}`);
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            const html = document.documentElement;
+            const icon = document.getElementById('darkIcon');
+            if (isDarkMode) {
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-moon';
+            } else {
+                html.classList.remove('dark');
+                icon.className = 'fa-solid fa-sun';
+            }
+        }
+
+        function getSelectedUploadDate() {
+            const m = document.getElementById('uploadMonth').value;
+            const d = document.getElementById('uploadDay').value;
+            const y = document.getElementById('uploadYear').value;
+            if (!m || !d || !y) return '';
+            return `${y}-${m}-${d}`;
+        }
+
+        function getSelectedAdminDate() {
+            const m = document.getElementById('adminMonth').value;
+            const d = document.getElementById('adminDay').value;
+            const y = document.getElementById('adminYear').value;
+            if (!m || !d || !y) return '';
+            return `${y}-${m}-${d}`;
+        }
+
+        function onUploadDateChange() {
+            renderUploadInspoVideos();
+        }
+
+        function toggleAdminVideoSourceInput() {
+            const sourceType = document.querySelector('input[name="adminVideoSourceType"]:checked').value;
+            const urlContainer = document.getElementById('adminUrlInputContainer');
+            const fileContainer = document.getElementById('adminFileUploadContainer');
+
+            if (sourceType === 'url') {
+                urlContainer.classList.remove('hidden');
+                fileContainer.classList.add('hidden');
+            } else {
+                urlContainer.classList.add('hidden');
+                fileContainer.classList.remove('hidden');
+            }
+        }
+
+        function handleAdminFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                adminUploadedVideoObjectUrl = URL.createObjectURL(file);
+                document.getElementById('adminSelectedFileName').innerText = file.name;
+            }
+        }
+
+        let creatorUploadedVideoObjectUrl = "";
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('attachedFilesPreview');
+            preview.innerHTML = '';
+            if (file) {
+                creatorUploadedVideoObjectUrl = URL.createObjectURL(file);
+                preview.innerHTML = `<span class="bg-gray-800 text-accent text-xs px-2.5 py-1 rounded flex items-center gap-1.5"><i class="fa-solid fa-file-video"></i> ${file.name}</span>`;
+            }
+        }
+
+        function renderOverview() {
+            let needsRev = appData.submissions.filter(s => s.status === 'Needs revision').length;
+            let awaiting = appData.submissions.filter(s => s.status === 'Awaiting review').length;
+            let approved = appData.submissions.filter(s => s.status === 'Approved').length;
+            let totalUploaded = appData.submissions.length;
+
+            document.getElementById('stat-revision').innerText = needsRev;
+            document.getElementById('stat-awaiting').innerText = awaiting;
+            document.getElementById('stat-approved').innerText = approved;
+            document.getElementById('stat-uploaded').innerText = totalUploaded;
+            document.getElementById('queueCount').innerText = `${totalUploaded} Active Submissions`;
+
+            const tbody = document.getElementById('overviewQueueTable');
+            tbody.innerHTML = '';
+
+            if (totalUploaded === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 text-xs">No submissions yet. All metrics are at 0.</td></tr>`;
+                return;
+            }
+
+            appData.submissions.forEach(sub => {
+                let badgeClass = sub.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : (sub.status === 'Needs revision' ? 'bg-amber-500/10 text-amber-500' : 'bg-cyan-500/10 text-cyan-500');
+                tbody.innerHTML += `
+                    <tr onclick="openSubmissionModal('${sub.id}')" class="hover:bg-gray-800/50 transition cursor-pointer">
+                        <td class="py-3 px-3 font-semibold text-white">#${sub.id}<br><span class="text-xs text-gray-400 font-normal">${sub.title}</span></td>
+                        <td class="py-3 px-3"><span class="text-accent font-medium">${sub.model}</span><br><span class="text-xs text-gray-500">${sub.niche}</span></td>
+                        <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${sub.status}</span></td>
+                        <td class="py-3 px-3 text-xs text-gray-400">${sub.submittedDate}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderUploadDropdowns() {
+            const modelSelect = document.getElementById('uploadModelSelect');
+            const nicheSelect = document.getElementById('uploadNicheSelect');
+            
+            modelSelect.innerHTML = '<option value="">Choose a model...</option>';
+            appData.models.forEach(m => {
+                modelSelect.innerHTML += `<option value="${m}">${m}</option>`;
+            });
+
+            nicheSelect.innerHTML = '<option value="">Choose a niche...</option>';
+            appData.niches.forEach(n => {
+                nicheSelect.innerHTML += `<option value="${n}">${n}</option>`;
+            });
+        }
+
+        function renderUploadInspoVideos() {
+            const dateVal = getSelectedUploadDate();
+            const container = document.getElementById('uploadInspoContainer');
+            container.innerHTML = '';
+
+            if (!dateVal) {
+                container.innerHTML = `<div class="col-span-full text-center py-6 text-gray-500 text-xs">Please select Month, Day, and Year above.</div>`;
+                return;
+            }
+
+            let matched = appData.inspoVideos.filter(v => v.date === dateVal);
+
+            if (matched.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-6 text-gray-500 text-xs">No inspiration videos attached by admin for date ${dateVal}.</div>`;
+                return;
+            }
+
+            matched.forEach(v => {
+                let isSelected = selectedInspoId === v.id;
+                container.innerHTML += `
+                    <div class="bg-gray-900 border ${isSelected ? 'border-accent ring-2 ring-accent' : 'border-gray-800'} rounded-lg p-2.5 space-y-2 flex flex-col justify-between">
+                        <div onclick="openVideoModal('${v.id}')" class="cursor-pointer space-y-1.5">
+                            <div class="aspect-[9/16] bg-black rounded overflow-hidden relative border border-gray-800 flex items-center justify-center">
+                                <video src="${v.url}" preload="metadata" muted playsinline class="w-full h-full object-contain pointer-events-none"></video>
+                                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                    <div class="w-7 h-7 rounded-full bg-black/50 text-accent flex items-center justify-center text-xs backdrop-blur-sm">
+                                        <i class="fa-solid fa-play"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="text-[11px] font-bold text-white truncate px-0.5" title="Inspo #${v.description}">Inspo #${v.description}</h4>
+                        </div>
+                        <div class="flex items-center justify-between gap-1 pt-1.5 border-t border-gray-800">
+                            <a href="${v.url}" download target="_blank" class="text-[10px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-1 rounded transition flex items-center gap-1" title="Download">
+                                <i class="fa-solid fa-download"></i> D/L
+                            </a>
+                            <button onclick="selectInspo('${v.id}')" class="text-[10px] px-2.5 py-1 rounded font-bold transition ${isSelected ? 'bg-accent text-gray-950' : 'bg-gray-800 text-white hover:bg-gray-700'}">
+                                ${isSelected ? '<i class="fa-solid fa-check"></i>' : 'Select'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function selectInspo(id) {
+            selectedInspoId = id;
+            document.getElementById('selectedInspoBadge').classList.remove('hidden');
+            renderUploadInspoVideos();
+        }
+
+        function openVideoModal(id) {
+            let v = appData.inspoVideos.find(item => item.id === id);
+            if (!v) return;
+            modalActiveInspoId = id;
+            document.getElementById('modalTitle').innerText = `Inspo #${v.description}`;
+            document.getElementById('modalVideoSource').src = v.url;
+            document.getElementById('modalVideoPlayer').load();
+            
+            const notesBox = document.getElementById('modalInspoNotesBox');
+            if (v.inspoNotes && v.inspoNotes.trim() !== '') {
+                notesBox.classList.remove('hidden');
+                document.getElementById('modalInspoNotesText').innerText = v.inspoNotes;
+            } else {
+                notesBox.classList.add('hidden');
+            }
+
+            document.getElementById('modalPromptRef').innerText = v.promptRef || 'No prompt reference provided.';
+            document.getElementById('modalDownloadBtn').href = v.url;
+            document.getElementById('videoModal').classList.remove('hidden');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.add('hidden');
+            document.getElementById('modalVideoPlayer').pause();
+        }
+
+        function confirmSelectInspoFromModal() {
+            if (modalActiveInspoId) {
+                selectInspo(modalActiveInspoId);
+                closeVideoModal();
+            }
+        }
+
+        function submitUploadReel() {
+            if (!selectedInspoId) {
+                alert('Please select an inspiration video first!');
+                return;
+            }
+            const dateVal = getSelectedUploadDate();
+            if (!dateVal) {
+                alert('Please select valid Month, Day, and Year.');
+                return;
+            }
+            const model = document.getElementById('uploadModelSelect').value;
+            const niche = document.getElementById('uploadNicheSelect').value;
+            const title = document.getElementById('uploadTitleInput').value.trim();
+            const prompt = document.getElementById('uploadPromptInput').value.trim();
+
+            if (!model || !niche || !title || !prompt) {
+                alert('Please fill in Model, Niche, Title format, and Prompt box.');
+                return;
+            }
+
+            let videoUrl = creatorUploadedVideoObjectUrl || "https://www.w3schools.com/html/mov_bbb.mp4";
+
+            const newSub = {
+                id: Math.floor(10000 + Math.random() * 90000).toString(),
+                title: title,
+                model: model,
+                niche: niche,
+                inspoId: selectedInspoId,
+                inspoDate: dateVal,
+                user: currentRole === 'Admin' ? 'Admin Controller' : 'Harvy',
+                status: "Awaiting review",
+                submittedDate: "Just now",
+                prompt: prompt,
+                videoUrl: videoUrl,
+                revisionNotes: ""
+            };
+
+            appData.submissions.unshift(newSub);
+            saveData();
+            alert('Reel successfully submitted for review!');
+            switchTab('overview');
+            renderOverview();
+            renderRevisions();
+            renderAwaiting();
+            renderApproved();
+            renderOutputs();
+            renderAdminOutputs();
+            renderAdminPanel();
+        }
+
+        function renderRevisions() {
+            const container = document.getElementById('revisionsContainer');
+            container.innerHTML = '';
+            let revs = appData.submissions.filter(s => s.status === 'Needs revision' && s.user === (currentRole === 'Admin' ? 'Admin Controller' : 'Harvy'));
+
+            if (revs.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-gray-900 border border-gray-800 rounded-xl p-8 text-center text-gray-500 text-sm">No revisions needed right now.</div>`;
+                return;
+            }
+
+            revs.forEach(sub => {
+                container.innerHTML += `
+                    <div onclick="openSubmissionModal('${sub.id}')" class="bg-gray-900 border border-amber-500/40 hover:border-amber-500 rounded-xl p-4 space-y-3 cursor-pointer transition">
+                        <div class="aspect-[9/16] bg-black rounded overflow-hidden relative border border-gray-800 flex items-center justify-center">
+                            <video src="${sub.videoUrl}" preload="metadata" muted playsinline class="w-full h-full object-contain pointer-events-none"></video>
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-black/50 text-amber-400 flex items-center justify-center text-sm backdrop-blur-sm">
+                                    <i class="fa-solid fa-play"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-amber-500"><i class="fa-solid fa-triangle-exclamation"></i> Needs Revision</span>
+                            <h4 class="text-sm font-bold text-white mt-1 truncate">${sub.title}</h4>
+                            <p class="text-xs text-gray-400 truncate"><strong class="text-amber-400">Feedback:</strong> ${sub.revisionNotes}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAwaiting() {
+            const container = document.getElementById('awaitingContainer');
+            container.innerHTML = '';
+            let items = appData.submissions.filter(s => s.status === 'Awaiting review' && s.user === (currentRole === 'Admin' ? 'Admin Controller' : 'Harvy'));
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-gray-900 border border-gray-800 rounded-xl p-8 text-center text-gray-500 text-sm">No videos currently awaiting review.</div>`;
+                return;
+            }
+
+            items.forEach(sub => {
+                container.innerHTML += `
+                    <div onclick="openSubmissionModal('${sub.id}')" class="bg-gray-900 border border-cyan-500/30 hover:border-cyan-500 rounded-xl p-4 space-y-3 cursor-pointer transition">
+                        <div class="aspect-[9/16] bg-black rounded overflow-hidden relative border border-gray-800 flex items-center justify-center">
+                            <video src="${sub.videoUrl}" preload="metadata" muted playsinline class="w-full h-full object-contain pointer-events-none"></video>
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-black/50 text-cyan-400 flex items-center justify-center text-sm backdrop-blur-sm">
+                                    <i class="fa-solid fa-play"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-cyan-400"><i class="fa-solid fa-clock"></i> Awaiting Review</span>
+                            <h4 class="text-sm font-bold text-white mt-1 truncate">${sub.title}</h4>
+                            <p class="text-xs text-gray-400">${sub.model} · ${sub.niche} | Date: ${sub.inspoDate}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openSubmissionModal(id) {
+            let sub = appData.submissions.find(s => s.id === id);
+            if (!sub) return;
+            activeSubmissionModalId = id;
+            isSubModalInEditMode = false;
+
+            document.getElementById('subModalReelIdBadge').innerText = `#${sub.id}`;
+            document.getElementById('subModalHeaderTitleText').innerText = sub.title;
+            document.getElementById('subModalModelBadge').innerHTML = `<i class="fa-solid fa-user text-accent"></i> ${sub.model}`;
+            document.getElementById('subModalNicheBadge').innerHTML = `<i class="fa-solid fa-tag text-accent"></i> ${sub.niche}`;
+            document.getElementById('subModalCreatorName').innerText = sub.user;
+            document.getElementById('subModalDateDisplay').innerText = `Submitted ${sub.submittedDate}`;
+
+            let statusBadge = document.getElementById('subModalStatusBadge');
+            statusBadge.innerText = sub.status;
+            if (sub.status === 'Approved') {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+            } else if (sub.status === 'Needs revision') {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20';
+            } else {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20';
+            }
+
+            let inspo = appData.inspoVideos.find(v => v.id === sub.inspoId);
+            if (inspo) {
+                document.getElementById('subModalInspoVideoSource').src = inspo.url;
+                document.getElementById('subModalInspoVideoPlayer').load();
+                document.getElementById('subModalInspoTitleDisplay').innerText = `Inspo #${inspo.description}`;
+            } else {
+                document.getElementById('subModalInspoVideoSource').src = sub.videoUrl;
+                document.getElementById('subModalInspoVideoPlayer').load();
+                document.getElementById('subModalInspoTitleDisplay').innerText = sub.title;
+            }
+
+            document.getElementById('subModalReelVideoSource').src = sub.videoUrl;
+            document.getElementById('subModalReelVideoPlayer').load();
+
+            document.getElementById('subModalPromptText').innerText = sub.prompt;
+            
+            let historyContainer = document.getElementById('subModalHistoryContainer');
+            historyContainer.innerHTML = '';
+            if (sub.revisionNotes) {
+                historyContainer.innerHTML = `
+                    <div class="flex items-start gap-2 text-xs text-gray-300">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 mt-1 shrink-0"></span>
+                        <div>
+                            <p class="font-semibold text-white">Revision Feedback / QA Notes</p>
+                            <p class="text-gray-300 text-[11px] mt-0.5">${sub.revisionNotes}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                historyContainer.innerHTML = `<p class="text-xs text-gray-500">No revisions or feedback logged yet.</p>`;
+            }
+
+            document.getElementById('subModalPromptDisplayContainer').classList.remove('hidden');
+            document.getElementById('subModalPromptEditContainer').classList.add('hidden');
+            document.getElementById('subModalEditOverlay').classList.add('hidden');
+            document.getElementById('subModalToggleEditBtn').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Edit & Resubmit`;
+
+            document.getElementById('submissionModal').classList.remove('hidden');
+        }
+
+        function closeSubmissionModal() {
+            document.getElementById('submissionModal').classList.add('hidden');
+            document.getElementById('subModalInspoVideoPlayer').pause();
+            document.getElementById('subModalReelVideoPlayer').pause();
+        }
+
+        let newModalEditedVideoObjectUrl = "";
+        document.getElementById('modalSubEditFileInput').onchange = function(e) {
+            let file = e.target.files[0];
+            if (file) {
+                newModalEditedVideoObjectUrl = URL.createObjectURL(file);
+                document.getElementById('subModalReelVideoSource').src = newModalEditedVideoObjectUrl;
+                document.getElementById('subModalReelVideoPlayer').load();
+            }
+        };
+
+        function toggleSubModalEditMode() {
+            isSubModalInEditMode = !isSubModalInEditMode;
+            let sub = appData.submissions.find(s => s.id === activeSubmissionModalId);
+            if (!sub) return;
+
+            let displayContainer = document.getElementById('subModalPromptDisplayContainer');
+            let editContainer = document.getElementById('subModalPromptEditContainer');
+            let editOverlay = document.getElementById('subModalEditOverlay');
+            let toggleBtn = document.getElementById('subModalToggleEditBtn');
+
+            if (isSubModalInEditMode) {
+                displayContainer.classList.add('hidden');
+                editContainer.classList.remove('hidden');
+                editOverlay.classList.remove('hidden');
+                document.getElementById('subModalEditPromptInput').value = sub.prompt;
+                document.getElementById('subModalEditTitleInput').value = sub.title;
+                toggleBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save & Resubmit`;
+            } else {
+                let newTitle = document.getElementById('subModalEditTitleInput').value.trim();
+                let newPrompt = document.getElementById('subModalEditPromptInput').value.trim();
+
+                if (!newTitle || !newPrompt) {
+                    alert('Title and prompt cannot be empty.');
+                    isSubModalInEditMode = true;
+                    return;
+                }
+
+                sub.title = newTitle;
+                sub.prompt = newPrompt;
+                if (newModalEditedVideoObjectUrl) {
+                    sub.videoUrl = newModalEditedVideoObjectUrl;
+                    newModalEditedVideoObjectUrl = "";
+                }
+                sub.status = 'Awaiting review';
+                sub.submittedDate = "Just edited";
+                saveData();
+
+                closeSubmissionModal();
+                renderOverview();
+                renderRevisions();
+                renderAwaiting();
+                renderOutputs();
+                renderAdminOutputs();
+                alert('Submission successfully updated and resubmitted for review!');
+            }
+        }
+
+        function unsubmitCurrentSubmission() {
+            if (confirm('Are you sure you want to unsubmit/delete this reel?')) {
+                appData.submissions = appData.submissions.filter(s => s.id !== activeSubmissionModalId);
+                saveData();
+                closeSubmissionModal();
+                renderOverview();
+                renderRevisions();
+                renderAwaiting();
+                renderOutputs();
+                renderAdminOutputs();
+                alert('Submission unsubmitted successfully.');
+            }
+        }
+
+        function renderApproved() {
+            const container = document.getElementById('approvedContainer');
+            container.innerHTML = '';
+            let items = appData.submissions.filter(s => s.status === 'Approved' && s.user === (currentRole === 'Admin' ? 'Admin Controller' : 'Harvy'));
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center text-gray-500 text-sm">No approved videos yet.</div>`;
+                return;
+            }
+
+            items.forEach(sub => {
+                container.innerHTML += `
+                    <div onclick="openSubmissionModal('${sub.id}')" class="bg-gray-900 border border-emerald-500/30 hover:border-emerald-500 rounded-xl p-4 flex items-center justify-between cursor-pointer transition">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-circle-check"></i> Approved (Inspo Date: ${sub.inspoDate})</span>
+                            <h4 class="text-sm font-bold text-white mt-1">${sub.title}</h4>
+                            <p class="text-xs text-gray-400">${sub.model} · ${sub.niche}</p>
+                        </div>
+                        <span class="text-xs bg-gray-800 text-gray-300 px-3 py-1.5 rounded">View Details</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderOutputs() {
+            const container = document.getElementById('outputListContainer');
+            container.innerHTML = '';
+            let outputs = appData.submissions.filter(s => s.user === (currentRole === 'Admin' ? 'Admin Controller' : 'Harvy'));
+
+            if (outputs.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-gray-500 text-sm">No outputs yet.</div>`;
+                return;
+            }
+
+            outputs.forEach(sub => {
+                let badgeClass = sub.status === 'Approved' ? 'text-emerald-400' : (sub.status === 'Needs revision' ? 'text-amber-400' : 'text-cyan-400');
+                container.innerHTML += `
+                    <div onclick="openSubmissionModal('${sub.id}')" class="bg-gray-900 border border-gray-800 hover:border-accent rounded-xl p-4 flex items-center justify-between cursor-pointer transition">
+                        <div>
+                            <span class="text-xs font-bold ${badgeClass}">${sub.status}</span>
+                            <h4 class="text-sm font-bold text-white mt-1">${sub.title}</h4>
+                            <p class="text-xs text-gray-400">${sub.model} · ${sub.niche} | Date: ${sub.inspoDate}</p>
+                        </div>
+                        <span class="text-xs bg-gray-800 text-gray-300 px-3 py-1.5 rounded">View Details</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAdminOutputs() {
+            const container = document.getElementById('adminOutputsContainer');
+            container.innerHTML = '';
+
+            if (appData.submissions.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-gray-900 border border-gray-800 rounded-xl p-8 text-center text-gray-500 text-sm">No outputs submitted by any creators or admins yet.</div>`;
+                return;
+            }
+
+            appData.submissions.forEach(sub => {
+                let badgeClass = sub.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500' : (sub.status === 'Needs revision' ? 'bg-amber-500/10 text-amber-500' : 'bg-cyan-500/10 text-cyan-500');
+                container.innerHTML += `
+                    <div onclick="openAdminReviewModal('${sub.id}')" class="bg-gray-900 border border-gray-800 hover:border-accent rounded-xl p-4 space-y-3 cursor-pointer transition">
+                        <div class="aspect-[9/16] bg-black rounded overflow-hidden relative border border-gray-800 flex items-center justify-center">
+                            <video src="${sub.videoUrl}" preload="metadata" muted playsinline class="w-full h-full object-contain pointer-events-none"></video>
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-black/50 text-accent flex items-center justify-center text-sm backdrop-blur-sm">
+                                    <i class="fa-solid fa-play"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${badgeClass}">${sub.status}</span>
+                            <h4 class="text-sm font-bold text-white mt-1 truncate">${sub.title}</h4>
+                            <p class="text-xs text-gray-400">Creator: <span class="text-accent">${sub.user}</span> | ${sub.model} · ${sub.niche}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openAdminReviewModal(id) {
+            let sub = appData.submissions.find(s => s.id === id);
+            if (!sub) return;
+            activeAdminReviewSubId = id;
+            document.getElementById('adminReviewTitle').innerText = sub.title;
+            document.getElementById('adminReviewMeta').innerText = `Creator: ${sub.user} | Model: ${sub.model} | Niche: ${sub.niche} | Date: ${sub.inspoDate}`;
+            document.getElementById('adminReviewPrompt').innerText = sub.prompt;
+            document.getElementById('adminReviewVideoSource').src = sub.videoUrl;
+            document.getElementById('adminReviewVideoPlayer').load();
+
+            document.getElementById('disapprovalSection').classList.add('hidden');
+            document.getElementById('adminReviewActions').classList.remove('hidden');
+            document.getElementById('adminDisapprovalNotes').value = '';
+            document.getElementById('adminReviewModal').classList.remove('hidden');
+        }
+
+        function closeAdminReviewModal() {
+            document.getElementById('adminReviewModal').classList.add('hidden');
+            document.getElementById('adminReviewVideoPlayer').pause();
+        }
+
+        function adminApproveSubmission(id) {
+            let sub = appData.submissions.find(s => s.id === id);
+            if (sub) {
+                sub.status = 'Approved';
+                sub.revisionNotes = '';
+                saveData();
+                closeAdminReviewModal();
+                renderOverview();
+                renderRevisions();
+                renderAwaiting();
+                renderApproved();
+                renderOutputs();
+                renderAdminOutputs();
+                renderAdminPanel();
+                alert('Output successfully approved!');
+            }
+        }
+
+        function showAdminDisapprovalBox() {
+            document.getElementById('disapprovalSection').classList.remove('hidden');
+            document.getElementById('adminReviewActions').classList.add('hidden');
+        }
+
+        function confirmAdminDisapproval() {
+            let notes = document.getElementById('adminDisapprovalNotes').value.trim();
+            if (!notes) {
+                alert('Please input feedback explaining what needs to be fixed or changed.');
+                return;
+            }
+
+            let sub = appData.submissions.find(s => s.id === activeAdminReviewSubId);
+            if (sub) {
+                sub.status = 'Needs revision';
+                sub.revisionNotes = notes;
+                saveData();
+                closeAdminReviewModal();
+                renderOverview();
+                renderRevisions();
+                renderAwaiting();
+                renderApproved();
+                renderOutputs();
+                renderAdminOutputs();
+                renderAdminPanel();
+                alert('Disapproval / Revision issued successfully!');
+            }
+        }
+
+        function renderAdminPanel() {
+            const tbody = document.getElementById('adminSubmissionsTableBody');
+            tbody.innerHTML = '';
+
+            if (appData.submissions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 text-xs">No submissions to review.</td></tr>`;
+                return;
+            }
+
+            appData.submissions.forEach(sub => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-800/50 transition">
+                        <td class="py-3 px-3 font-semibold text-white">#${sub.id} - ${sub.title}<br><span class="text-[11px] font-mono text-cyan-400">Prompt: ${sub.prompt}</span></td>
+                        <td class="py-3 px-3"><span class="text-accent font-medium">${sub.model}</span><br><span class="text-xs text-gray-500">${sub.niche}</span></td>
+                        <td class="py-3 px-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-800 text-gray-300">${sub.status}</span></td>
+                        <td class="py-3 px-3 text-right space-x-2">
+                            <button onclick="adminApproveSubmission('${sub.id}')" class="text-xs bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white px-2.5 py-1 rounded transition">Approve</button>
+                            <button onclick="openAdminReviewModal('${sub.id}')" class="text-xs bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white px-2.5 py-1 rounded transition">Review & Feedback</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function adminAttachInspoVideo() {
+            const dateVal = getSelectedAdminDate();
+            const sourceType = document.querySelector('input[name="adminVideoSourceType"]:checked').value;
+            const inspoNum = document.getElementById('adminInspoDescInput').value.trim();
+            const inspoNotes = document.getElementById('adminInspoNotesInput').value.trim();
+            const promptRef = document.getElementById('adminInspoPromptRef').value.trim();
+
+            let finalUrl = "";
+            if (sourceType === 'url') {
+                finalUrl = document.getElementById('adminInspoUrlInput').value.trim();
+            } else {
+                finalUrl = adminUploadedVideoObjectUrl;
+            }
+
+            if (!dateVal || !finalUrl || !inspoNum) {
+                alert('Please select valid Month, Day, and Year, and provide a video (via URL or computer upload) and Inspo Number.');
+                return;
+            }
+
+            const newInspo = {
+                id: 'inspo_' + Date.now(),
+                date: dateVal,
+                url: finalUrl,
+                description: inspoNum,
+                inspoNotes: inspoNotes,
+                promptRef: promptRef
+            };
+
+            appData.inspoVideos.push(newInspo);
+            saveData();
+            renderUploadInspoVideos();
+            alert(`Inspiration video attached successfully for date ${dateVal}!`);
+        }
+
+        function adminAddModel() {
+            const val = document.getElementById('adminNewModelInput').value.trim();
+            if (!val) return;
+            if (!appData.models.includes(val)) {
+                appData.models.push(val);
+                saveData();
+                document.getElementById('adminNewModelInput').value = '';
+                renderUploadDropdowns();
+                alert(`Model "${val}" added!`);
+            }
+        }
+
+        function adminAddNiche() {
+            const val = document.getElementById('adminNewNicheInput').value.trim();
+            if (!val) return;
+            if (!appData.niches.includes(val)) {
+                appData.niches.push(val);
+                saveData();
+                document.getElementById('adminNewNicheInput').value = '';
+                renderUploadDropdowns();
+                alert(`Niche "${val}" added!`);
+            }
+        }
+    </script>
+</body>
+</html>
